@@ -1,12 +1,12 @@
-#include "application.h"
+#include "application.hpp"
 
-namespace vk_te {
+namespace vkte {
 
 void Application::run() {
 
-    while (!m_vk_te_window.shouldClose()) {
+    while (!m_vkte_window.shouldClose()) {
         glfwPollEvents();
     }
 }
 
-}  // namespace vk_te
+}  // namespace vkte

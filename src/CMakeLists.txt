@@ -21,7 +21,9 @@ set(PROJECT_DIRS
 include_directories(/usr/local/lib)
 include_directories(/usr/local/include)
 
-find_package(glfw3 3.3 REQUIRED)
+#find_package(glfw3 3.3 REQUIRED)
+find_package(glfw3 NAMES glfw3 REQUIRED)
+find_package(Vulkan REQUIRED)
 
 #find_package(GTest REQUIRED)
 #
@@ -57,7 +59,10 @@ add_executable(${PROJECT_NAME} ${PROJECT_SOURCES})
 #target_include_directories(${PROJECT_NAME} PRIVATE ${CMAKE_SOURCE_DIR}/view)
 #target_include_directories(${PROJECT_NAME} PRIVATE ${CMAKE_SOURCE_DIR}/controller)
 
+#target_include_directories(${PROJECT_NAME} PUBLIC ${Vulkan_INCLUDE_DIRS})
+
 target_link_libraries(${PROJECT_NAME} glfw)
+target_link_libraries(${PROJECT_NAME} Vulkan::Vulkan)
 #target_link_libraries(${TEST_EXECUTABLE} PRIVATE ${GTEST_LIBRARIES} pthread)
 
 #target_compile_options(${TEST_EXECUTABLE} PRIVATE ${COVERAGE_COMPILE_FLAGS})

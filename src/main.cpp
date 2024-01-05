@@ -1,4 +1,4 @@
-#include "application.h"
+#include "application.hpp"
 
 //std
 #include <iostream>
@@ -6,7 +6,7 @@
 #include <stdexcept>
 
 int main() {
-    vk_te::Application app{};
+    vkte::Application app{};
 
     try {
         app.run();
