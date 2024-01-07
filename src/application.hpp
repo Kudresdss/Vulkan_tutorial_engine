@@ -21,7 +21,7 @@ private:
         m_vkte_device,
         "shaders/simple_shader.vert.spv",
         "shaders/simple_shader.frag.spv",
-        VKTEPipeline::defaultPipelineConfigInfo(WIDTH, HEIGHT)};
+        VKTEPipeline::setDefaultPipelineConfigInfo(WIDTH, HEIGHT)};
 };
 
 }  // namespace vkte
