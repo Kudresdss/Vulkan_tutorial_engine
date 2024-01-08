@@ -133,22 +133,26 @@ void VKTEPipeline::createShaderModule(const std::vector<char>& code, VkShaderMod
     }
 }
 
+void VKTEPipeline::bind(VkCommandBuffer commandBuffer) {
+    vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, graphicsPipeline);
+}
+
 PipelineConfigInfo VKTEPipeline::setDefaultPipelineConfigInfo(uint32_t width, uint32_t height) {
     PipelineConfigInfo configInfo{};
+
+    configInfo.inputAssemblyInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_INPUT_ASSEMBLY_STATE_CREATE_INFO;
+    configInfo.inputAssemblyInfo.topology = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST;
+    configInfo.inputAssemblyInfo.primitiveRestartEnable = VK_FALSE;
 
     configInfo.viewport.x = 0.0f;
     configInfo.viewport.y = 0.0f;
     configInfo.viewport.width = static_cast<float>(width);
     configInfo.viewport.height = static_cast<float>(height);
     configInfo.viewport.minDepth = 0.0f;
-    configInfo.viewport.minDepth = 1.0f;
+    configInfo.viewport.maxDepth = 1.0f;
 
     configInfo.scissor.offset = {0, 0};
     configInfo.scissor.extent = {width, height};
-
-    configInfo.inputAssemblyInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_INPUT_ASSEMBLY_STATE_CREATE_INFO;
-    configInfo.inputAssemblyInfo.topology = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST;
-    configInfo.inputAssemblyInfo.primitiveRestartEnable = VK_FALSE;
 
     configInfo.rasterizationInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_RASTERIZATION_STATE_CREATE_INFO;
     configInfo.rasterizationInfo.depthClampEnable = VK_FALSE;

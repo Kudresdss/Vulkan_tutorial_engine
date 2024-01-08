@@ -35,6 +35,8 @@ public:
     VKTEPipeline(const VKTEPipeline &) = delete;
     VKTEPipeline& operator=(const VKTEPipeline &) = delete;
 
+    void bind(VkCommandBuffer commandBuffer);
+
     static PipelineConfigInfo setDefaultPipelineConfigInfo(uint32_t width, uint32_t height);
 
 private:
