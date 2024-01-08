@@ -13,15 +13,15 @@ VKTEPipeline::VKTEPipeline(
     VKTEDevice& device,
     const std::string& vertFilepath,
     const std::string& fragFilepath,
-    const PipelineConfigInfo& configInfo) : m_vkte_device(device) {
+    const PipelineConfigInfo& configInfo) : vkteDevice(device) {
 
     createGraphicsPipeline(vertFilepath, fragFilepath, configInfo);
 }
 
 VKTEPipeline::~VKTEPipeline() {
-    vkDestroyShaderModule(m_vkte_device.device(), vertShaderModule, nullptr);
-    vkDestroyShaderModule(m_vkte_device.device(), fragShaderModule, nullptr);
-    vkDestroyPipeline(m_vkte_device.device(), graphicsPipeline, nullptr);
+    vkDestroyShaderModule(vkteDevice.device(), vertShaderModule, nullptr);
+    vkDestroyShaderModule(vkteDevice.device(), fragShaderModule, nullptr);
+    vkDestroyPipeline(vkteDevice.device(), graphicsPipeline, nullptr);
 }
 
 std::vector<char> VKTEPipeline::readFile(const std::string& filepath) {
@@ -84,13 +84,20 @@ void VKTEPipeline::createGraphicsPipeline(
     vertexInputInfo.pVertexAttributeDescriptions = nullptr;
     vertexInputInfo.pVertexBindingDescriptions = nullptr;
 
+    VkPipelineViewportStateCreateInfo viewportInfo{};
+    viewportInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_VIEWPORT_STATE_CREATE_INFO;
+    viewportInfo.viewportCount = 1;
+    viewportInfo.pViewports = &configInfo.viewport;
+    viewportInfo.scissorCount = 1;
+    viewportInfo.pScissors = &configInfo.scissor;
+
     VkGraphicsPipelineCreateInfo pipelineInfo{};
     pipelineInfo.sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO;
     pipelineInfo.stageCount = 2;
     pipelineInfo.pStages = shaderStages;
     pipelineInfo.pVertexInputState = &vertexInputInfo;
     pipelineInfo.pInputAssemblyState = &configInfo.inputAssemblyInfo;
-    pipelineInfo.pViewportState = &configInfo.viewportInfo;
+    pipelineInfo.pViewportState = &viewportInfo;
     pipelineInfo.pRasterizationState = &configInfo.rasterizationInfo;
     pipelineInfo.pMultisampleState = &configInfo.multisampleInfo;
     pipelineInfo.pColorBlendState = &configInfo.colorBlendInfo;
@@ -105,7 +112,7 @@ void VKTEPipeline::createGraphicsPipeline(
     pipelineInfo.basePipelineHandle = VK_NULL_HANDLE;
 
     if (vkCreateGraphicsPipelines(
-            m_vkte_device.device(),
+            vkteDevice.device(),
             VK_NULL_HANDLE,
             1,
             &pipelineInfo,
@@ -121,7 +128,7 @@ void VKTEPipeline::createShaderModule(const std::vector<char>& code, VkShaderMod
     createInfo.codeSize = code.size();
     createInfo.pCode = reinterpret_cast<const uint32_t*>(code.data());
 
-    if (vkCreateShaderModule(m_vkte_device.device(), &createInfo, nullptr, shaderModule) != VK_SUCCESS) {
+    if (vkCreateShaderModule(vkteDevice.device(), &createInfo, nullptr, shaderModule) != VK_SUCCESS) {
         throw std::runtime_error("failed to create shader module");
     }
 }
@@ -138,12 +145,6 @@ PipelineConfigInfo VKTEPipeline::setDefaultPipelineConfigInfo(uint32_t width, ui
 
     configInfo.scissor.offset = {0, 0};
     configInfo.scissor.extent = {width, height};
-
-    configInfo.viewportInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_VIEWPORT_STATE_CREATE_INFO;
-    configInfo.viewportInfo.viewportCount = 1;
-    configInfo.viewportInfo.pViewports = &configInfo.viewport;
-    configInfo.viewportInfo.scissorCount = 1;
-    configInfo.viewportInfo.pScissors = &configInfo.scissor;
 
     configInfo.inputAssemblyInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_INPUT_ASSEMBLY_STATE_CREATE_INFO;
     configInfo.inputAssemblyInfo.topology = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST;

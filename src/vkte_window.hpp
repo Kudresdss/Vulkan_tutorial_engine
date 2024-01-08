@@ -14,21 +14,22 @@ public:
     VKTEWindow(int width, int height, std::string name);
     ~VKTEWindow();
 
-    VKTEWindow(const VKTEWindow&) = delete;
-    VKTEWindow& operator=(const VKTEWindow&) = delete;
+    VKTEWindow(const VKTEWindow &) = delete;
+    VKTEWindow& operator=(const VKTEWindow &) = delete;
 
-    bool shouldClose() { return glfwWindowShouldClose(m_glfw_window); }
+    bool shouldClose() { return glfwWindowShouldClose(glfwWindow); }
+    VkExtent2D getExtent() { return { static_cast<uint32_t>(width), static_cast<uint32_t>(height)}; };
 
     void createWindowSurface(VkInstance instance, VkSurfaceKHR *surface);
 
 private:
     void initWindow();
 
-    const int c_width;
-    const int c_height;
+    const int width;
+    const int height;
 
-    std::string m_window_name;
-    GLFWwindow *m_glfw_window;
+    std::string windowName;
+    GLFWwindow *glfwWindow;
 };
 
 }  // namespace vkte

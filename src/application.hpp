@@ -4,6 +4,11 @@
 #include "vkte_pipeline.hpp"
 #include "vkte_window.hpp"
 #include "vkte_device.hpp"
+#include "vkte_swap_chain.hpp"
+
+//std
+#include <memory>
+#include <vector>
 
 namespace vkte {
 
@@ -12,16 +17,26 @@ public:
     static constexpr int WIDTH = 800;
     static constexpr int HEIGHT = 600;
 
+    Application();
+    ~Application();
+
+    Application(const Application &) = delete;
+    Application& operator=(const Application &) = delete;
+
     void run();
 
 private:
-    VKTEWindow m_vkte_window{WIDTH, HEIGHT, "Vulkan tutorial engine"};
-    VKTEDevice m_vkte_device{m_vkte_window};
-    VKTEPipeline m_vkte_pipeline{
-        m_vkte_device,
-        "shaders/simple_shader.vert.spv",
-        "shaders/simple_shader.frag.spv",
-        VKTEPipeline::setDefaultPipelineConfigInfo(WIDTH, HEIGHT)};
+    void createPipelineLayout();
+    void createPipeline();
+    void createCommandBuffers();
+    void drawFrame();
+
+    VKTEWindow vkteWindow{WIDTH, HEIGHT, "Vulkan tutorial engine"};
+    VKTEDevice vkteDevice{vkteWindow};
+    VKTESwapChain vkteSwapChain{vkteDevice, vkteWindow.getExtent()};
+    std::unique_ptr<VKTEPipeline> vktePipeline;
+    VkPipelineLayout pipelineLayout;
+    std::vector<VkCommandBuffer> commandBuffers;
 };
 
 }  // namespace vkte

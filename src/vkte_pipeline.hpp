@@ -12,7 +12,6 @@ namespace vkte {
 struct PipelineConfigInfo {
     VkViewport viewport;
     VkRect2D scissor;
-    VkPipelineViewportStateCreateInfo viewportInfo;
     VkPipelineInputAssemblyStateCreateInfo inputAssemblyInfo;
     VkPipelineRasterizationStateCreateInfo rasterizationInfo;
     VkPipelineMultisampleStateCreateInfo multisampleInfo;
@@ -33,8 +32,8 @@ public:
             const PipelineConfigInfo& configInfo);
     ~VKTEPipeline();
 
-    VKTEPipeline(const VKTEPipeline&) = delete;
-    void operator=(const VKTEPipeline&) = delete;
+    VKTEPipeline(const VKTEPipeline &) = delete;
+    VKTEPipeline& operator=(const VKTEPipeline &) = delete;
 
     static PipelineConfigInfo setDefaultPipelineConfigInfo(uint32_t width, uint32_t height);
 
@@ -47,7 +46,7 @@ private:
 
     void createShaderModule(const std::vector<char>& code, VkShaderModule *shaderModule);
 
-    VKTEDevice& m_vkte_device;
+    VKTEDevice& vkteDevice;
     VkPipeline graphicsPipeline;
     VkShaderModule vertShaderModule;
     VkShaderModule fragShaderModule;

@@ -36,7 +36,7 @@ public:
 
     // Not copyable or movable
     VKTEDevice(const VKTEDevice &) = delete;
-    void operator=(const VKTEDevice &) = delete;
+    VKTEDevice& operator=(const VKTEDevice &) = delete;
     VKTEDevice(VKTEDevice &&) = delete;
     VKTEDevice &operator=(VKTEDevice &&) = delete;
 
