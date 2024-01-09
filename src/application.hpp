@@ -5,6 +5,7 @@
 #include "vkte_window.hpp"
 #include "vkte_device.hpp"
 #include "vkte_swap_chain.hpp"
+#include "vkte_model.hpp"
 
 //std
 #include <memory>
@@ -26,6 +27,7 @@ public:
     void run();
 
 private:
+    void loadModels();
     void createPipelineLayout();
     void createPipeline();
     void createCommandBuffers();
@@ -37,6 +39,7 @@ private:
     std::unique_ptr<VKTEPipeline> vktePipeline;
     VkPipelineLayout pipelineLayout;
     std::vector<VkCommandBuffer> commandBuffers;
+    std::unique_ptr<VKTEModel> vkteModel;
 };
 
 }  // namespace vkte

@@ -7,6 +7,7 @@
 namespace vkte {
 
 Application::Application() {
+    loadModels();
     createPipelineLayout();
     createPipeline();
     createCommandBuffers();
@@ -24,6 +25,16 @@ void Application::run() {
     }
 
     vkDeviceWaitIdle(vkteDevice.device());
+}
+
+void Application::loadModels() {
+    std::vector<VKTEModel::Vertex> vertices {
+        {{0.0f, -0.5f}},
+        {{0.5f, 0.5f}},
+        {{-0.5f, 0.5f}}
+    };
+
+    vkteModel = std::make_unique<VKTEModel>(vkteDevice, vertices);
 }
 
 void Application::createPipelineLayout() {
@@ -97,7 +108,8 @@ void Application::createCommandBuffers() {
         vkCmdBeginRenderPass(commandBuffers[i], &renderPassBeginInfo, VK_SUBPASS_CONTENTS_INLINE);
 
         vktePipeline->bind(commandBuffers[i]);
-        vkCmdDraw(commandBuffers[i], 3, 1, 0, 0);
+        vkteModel->bind(commandBuffers[i]);
+        vkteModel->draw(commandBuffers[i]);
 
         vkCmdEndRenderPass(commandBuffers[i]);
         if (vkEndCommandBuffer(commandBuffers[i]) != VK_SUCCESS) {
