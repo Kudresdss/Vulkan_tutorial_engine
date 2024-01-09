@@ -17,6 +17,7 @@ class VKTEModel {
 public:
     struct Vertex{
         glm::vec2 position;
+        glm::vec3 color;
 
         static std::vector<VkVertexInputAttributeDescription> getAttributeDescriptions();
         static std::vector<VkVertexInputBindingDescription> getBindingDescriptions();

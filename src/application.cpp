@@ -29,9 +29,9 @@ void Application::run() {
 
 void Application::loadModels() {
     std::vector<VKTEModel::Vertex> vertices {
-        {{0.0f, -0.5f}},
-        {{0.5f, 0.5f}},
-        {{-0.5f, 0.5f}}
+        {{0.0f, -0.5f}, {1.0f, 0.0f, 0.0f}},
+        {{0.5f, 0.5f}, {0.0f, 1.0f, 0.0f}},
+        {{-0.5f, 0.5f}, {0.0f, 0.0f, 1.0f}}
     };
 
     vkteModel = std::make_unique<VKTEModel>(vkteDevice, vertices);
@@ -131,5 +131,32 @@ void Application::drawFrame() {
         throw std::runtime_error("failed to present swap chain image!");
     }
 }
+
+// отрисовка треугольника Серпинского
+
+//void Application::sierpinski(
+//        std::vector<VKTEModel::Vertex> &vertices,
+//        int depth,
+//        glm::vec2 left,
+//        glm::vec2 right,
+//        glm::vec2 top) {
+//    if (depth <= 0) {
+//        vertices.push_back({top});
+//        vertices.push_back({right});
+//        vertices.push_back({left});
+//    } else {
+//        auto leftTop = 0.5f * (left + top);
+//        auto rightTop = 0.5f * (right + top);
+//        auto leftRight = 0.5f * (left + right);
+//        sierpinski(vertices, depth - 1, left, leftRight, leftTop);
+//        sierpinski(vertices, depth - 1, leftRight, right, rightTop);
+//        sierpinski(vertices, depth - 1, leftTop, rightTop, top);
+//    }
+//}
+//void Application::loadModels() {
+//    std::vector<VKTEModel::Vertex> vertices{};
+//    sierpinski(vertices, 10, {-0.5f, 0.5f}, {0.5f, 0.5f}, {0.0f, -0.5f});
+//    vkteModel = std::make_unique<VKTEModel>(vkteDevice, vertices);
+//}
 
 }  // namespace vkte

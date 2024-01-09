@@ -33,6 +33,13 @@ private:
     void createCommandBuffers();
     void drawFrame();
 
+    void sierpinski(
+            std::vector<VKTEModel::Vertex> &vertices,
+            int depth,
+            glm::vec2 left,
+            glm::vec2 right,
+            glm::vec2 top);
+
     VKTEWindow vkteWindow{WIDTH, HEIGHT, "Vulkan tutorial engine"};
     VKTEDevice vkteDevice{vkteWindow};
     VKTESwapChain vkteSwapChain{vkteDevice, vkteWindow.getExtent()};
