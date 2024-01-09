@@ -31,14 +31,16 @@ public:
     const bool enableValidationLayers = true;
 #endif
 
+//    VKTEDevice() = default;
     VKTEDevice(VKTEWindow &window);
     ~VKTEDevice();
+
 
     // Not copyable or movable
     VKTEDevice(const VKTEDevice &) = delete;
     VKTEDevice& operator=(const VKTEDevice &) = delete;
     VKTEDevice(VKTEDevice &&) = delete;
-    VKTEDevice &operator=(VKTEDevice &&) = delete;
+    VKTEDevice& operator=(VKTEDevice &&) = delete;
 
     VkCommandPool getCommandPool() { return commandPool; }
     VkDevice device() { return device_; }

@@ -13,6 +13,17 @@ namespace vkte {
 
 VKTESwapChain::VKTESwapChain(VKTEDevice &deviceRef, VkExtent2D extent)
         : device{deviceRef}, windowExtent{extent} {
+    init();
+}
+
+VKTESwapChain::VKTESwapChain(VKTEDevice &deviceRef, VkExtent2D extent, std::shared_ptr<VKTESwapChain> previous)
+        : device{deviceRef}, windowExtent{extent}, oldSwapChain{previous} {
+    init();
+
+    oldSwapChain = nullptr;  // clean up old swap chain after it's no longer needed
+}
+
+void VKTESwapChain::init() {
     createSwapChain();
     createImageViews();
     createRenderPass();
@@ -162,7 +173,7 @@ void VKTESwapChain::createSwapChain() {
     createInfo.presentMode = presentMode;
     createInfo.clipped = VK_TRUE;
 
-    createInfo.oldSwapchain = VK_NULL_HANDLE;
+    createInfo.oldSwapchain = oldSwapChain == nullptr ? VK_NULL_HANDLE : oldSwapChain->swapChain;
 
     if (vkCreateSwapchainKHR(device.device(), &createInfo, nullptr, &swapChain) != VK_SUCCESS) {
         throw std::runtime_error("failed to create swap chain!");
@@ -362,7 +373,7 @@ void VKTESwapChain::createSyncObjects() {
 VkSurfaceFormatKHR VKTESwapChain::chooseSwapSurfaceFormat(
         const std::vector<VkSurfaceFormatKHR> &availableFormats) {
     for (const auto &availableFormat : availableFormats) {
-        if (availableFormat.format == VK_FORMAT_B8G8R8A8_UNORM &&
+        if (availableFormat.format == VK_FORMAT_B8G8R8A8_SRGB &&
             availableFormat.colorSpace == VK_COLOR_SPACE_SRGB_NONLINEAR_KHR) {
             return availableFormat;
         }

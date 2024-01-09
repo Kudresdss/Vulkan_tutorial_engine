@@ -19,9 +19,18 @@ VKTEWindow::~VKTEWindow() {
 void VKTEWindow::initWindow() {
     glfwInit();
     glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
-    glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
+    glfwWindowHint(GLFW_RESIZABLE, GLFW_TRUE);
 
     glfwWindow = glfwCreateWindow(width, height, windowName.c_str(), nullptr, nullptr);
+    glfwSetWindowUserPointer(glfwWindow, this);
+    glfwSetFramebufferSizeCallback(glfwWindow, framebufferResizeCallback);
+}
+
+void VKTEWindow::framebufferResizeCallback(GLFWwindow *glfwWindow, int width, int height) {
+    auto vkteWindow = reinterpret_cast<VKTEWindow *>(glfwGetWindowUserPointer(glfwWindow));
+    vkteWindow->framebufferResized = true;
+    vkteWindow->width = width;
+    vkteWindow->height = height;
 }
 
 void VKTEWindow::createWindowSurface(VkInstance instance, VkSurfaceKHR *surface) {

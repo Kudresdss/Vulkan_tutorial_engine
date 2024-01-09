@@ -31,18 +31,16 @@ private:
     void createPipelineLayout();
     void createPipeline();
     void createCommandBuffers();
+    void freeCommandBuffers();
     void drawFrame();
 
-    void sierpinski(
-            std::vector<VKTEModel::Vertex> &vertices,
-            int depth,
-            glm::vec2 left,
-            glm::vec2 right,
-            glm::vec2 top);
+    // Window initial swap chain creation or recreation in case of window resize
+    void recreateSwapChain();
+    void recordCommandBuffer(int imageIndex);
 
     VKTEWindow vkteWindow{WIDTH, HEIGHT, "Vulkan tutorial engine"};
     VKTEDevice vkteDevice{vkteWindow};
-    VKTESwapChain vkteSwapChain{vkteDevice, vkteWindow.getExtent()};
+    std::unique_ptr<VKTESwapChain> vkteSwapChain;
     std::unique_ptr<VKTEPipeline> vktePipeline;
     VkPipelineLayout pipelineLayout;
     std::vector<VkCommandBuffer> commandBuffers;

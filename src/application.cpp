@@ -9,7 +9,7 @@ namespace vkte {
 Application::Application() {
     loadModels();
     createPipelineLayout();
-    createPipeline();
+    recreateSwapChain();
     createCommandBuffers();
 }
 
@@ -55,9 +55,12 @@ void Application::createPipelineLayout() {
 }
 
 void Application::createPipeline() {
-    auto pipelineConfigInfo =
-        VKTEPipeline::setDefaultPipelineConfigInfo(vkteSwapChain.width(), vkteSwapChain.height());
-    pipelineConfigInfo.renderPass = vkteSwapChain.getRenderPass();
+    assert(vkteSwapChain != nullptr && "Cannot create pipeline before swap chain");
+    assert(pipelineLayout != nullptr && "Cannot create pipeline before pipeline layout");
+
+    PipelineConfigInfo pipelineConfigInfo{};
+    VKTEPipeline::setDefaultPipelineConfigInfo(pipelineConfigInfo);
+    pipelineConfigInfo.renderPass = vkteSwapChain->getRenderPass();
     pipelineConfigInfo.pipelineLayout = pipelineLayout;
     vktePipeline = std::make_unique<VKTEPipeline>(
         vkteDevice,
@@ -66,8 +69,30 @@ void Application::createPipeline() {
         pipelineConfigInfo);
 }
 
+void Application::recreateSwapChain() {
+    auto extent = vkteWindow.getExtent();
+    while (extent.width == 0 || extent.height == 0) {  // If any of window's dimensions are zero (during resize) -> wait
+        extent = vkteWindow.getExtent();
+        glfwWaitEvents();
+    }
+
+    vkDeviceWaitIdle(vkteDevice.device());
+    if (vkteSwapChain == nullptr) {  // There's no previous swap chain (init or resize)
+        vkteSwapChain = std::make_unique<VKTESwapChain>(vkteDevice, extent);
+    }
+    else {  // There is a previous swap chain
+        vkteSwapChain = std::make_unique<VKTESwapChain>(vkteDevice, extent, std::move(vkteSwapChain));
+        if (vkteSwapChain->imageCount() != commandBuffers.size()) {  // New swap chain supports different frame bufferization
+            freeCommandBuffers();
+            createCommandBuffers();
+        }
+    }
+
+    createPipeline();  // Future optimization: if render pass is compatible -> do noting
+}
+
 void Application::createCommandBuffers() {
-    commandBuffers.resize(vkteSwapChain.imageCount());
+    commandBuffers.resize(vkteSwapChain->imageCount());
 
     VkCommandBufferAllocateInfo allocateInfo{};
     allocateInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
@@ -82,81 +107,84 @@ void Application::createCommandBuffers() {
             VK_SUCCESS) {
         throw std::runtime_error("failed to allocate command buffers!");
     }
+}
 
-    for (int i = 0; i < commandBuffers.size(); ++i) {
-        VkCommandBufferBeginInfo commandBufferBeginInfo{};
-        commandBufferBeginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
+void Application::freeCommandBuffers() {
+    vkFreeCommandBuffers(
+        vkteDevice.device(),
+        vkteDevice.getCommandPool(),
+        static_cast<uint32_t>(commandBuffers.size()),
+        commandBuffers.data());
+    commandBuffers.clear();
+}
 
-        if (vkBeginCommandBuffer(commandBuffers[i], &commandBufferBeginInfo) != VK_SUCCESS) {
-            throw std::runtime_error("failed to begin recording command buffer!");
-        }
+void Application::recordCommandBuffer(int imageIndex) {
+    VkCommandBufferBeginInfo commandBufferBeginInfo{};
+    commandBufferBeginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
 
-        VkRenderPassBeginInfo renderPassBeginInfo{};
-        renderPassBeginInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
-        renderPassBeginInfo.renderPass = vkteSwapChain.getRenderPass();
-        renderPassBeginInfo.framebuffer = vkteSwapChain.getFrameBuffer(i);
+    if (vkBeginCommandBuffer(commandBuffers[imageIndex], &commandBufferBeginInfo) != VK_SUCCESS) {
+        throw std::runtime_error("failed to begin recording command buffer!");
+    }
 
-        renderPassBeginInfo.renderArea.offset = {0, 0};
-        renderPassBeginInfo.renderArea.extent = vkteSwapChain.getSwapChainExtent();
+    VkRenderPassBeginInfo renderPassBeginInfo{};
+    renderPassBeginInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
+    renderPassBeginInfo.renderPass = vkteSwapChain->getRenderPass();
+    renderPassBeginInfo.framebuffer = vkteSwapChain->getFrameBuffer(imageIndex);
 
-        std::array<VkClearValue, 2> clearValues{};
-        clearValues[0].color = {0.1f, 0.1f, 0.1f, 1.0f};
-        clearValues[1].depthStencil = {1.0f, 0};
-        renderPassBeginInfo.clearValueCount = static_cast<uint32_t>(clearValues.size());
-        renderPassBeginInfo.pClearValues = clearValues.data();
+    renderPassBeginInfo.renderArea.offset = {0, 0};
+    renderPassBeginInfo.renderArea.extent = vkteSwapChain->getSwapChainExtent();
 
-        vkCmdBeginRenderPass(commandBuffers[i], &renderPassBeginInfo, VK_SUBPASS_CONTENTS_INLINE);
+    std::array<VkClearValue, 2> clearValues{};
+    clearValues[0].color = {0.1f, 0.1f, 0.1f, 1.0f};
+    clearValues[1].depthStencil = {1.0f, 0};
+    renderPassBeginInfo.clearValueCount = static_cast<uint32_t>(clearValues.size());
+    renderPassBeginInfo.pClearValues = clearValues.data();
 
-        vktePipeline->bind(commandBuffers[i]);
-        vkteModel->bind(commandBuffers[i]);
-        vkteModel->draw(commandBuffers[i]);
+    vkCmdBeginRenderPass(commandBuffers[imageIndex], &renderPassBeginInfo, VK_SUBPASS_CONTENTS_INLINE);
 
-        vkCmdEndRenderPass(commandBuffers[i]);
-        if (vkEndCommandBuffer(commandBuffers[i]) != VK_SUCCESS) {
-            throw std::runtime_error("failed to record command buffer!");
-        }
+    VkViewport viewport{};
+    viewport.x = 0.0f;
+    viewport.y = 0.0f;
+    viewport.width = static_cast<float>(vkteSwapChain->getSwapChainExtent().width);
+    viewport.height = static_cast<float>(vkteSwapChain->getSwapChainExtent().height);
+    viewport.minDepth = 0.0f;
+    viewport.maxDepth = 1.0f;
+    VkRect2D scissor{{0, 0}, vkteSwapChain->getSwapChainExtent()};
+    vkCmdSetViewport(commandBuffers[imageIndex], 0, 1, &viewport);
+    vkCmdSetScissor(commandBuffers[imageIndex], 0, 1, &scissor);
+
+    vktePipeline->bind(commandBuffers[imageIndex]);
+    vkteModel->bind(commandBuffers[imageIndex]);
+    vkteModel->draw(commandBuffers[imageIndex]);
+
+    vkCmdEndRenderPass(commandBuffers[imageIndex]);
+    if (vkEndCommandBuffer(commandBuffers[imageIndex]) != VK_SUCCESS) {
+        throw std::runtime_error("failed to record command buffer!");
     }
 }
 
 void Application::drawFrame() {
     uint32_t imageIndex;
 
-    auto result = vkteSwapChain.acquireNextImage(&imageIndex);
+    auto result = vkteSwapChain->acquireNextImage(&imageIndex);
+    if (result == VK_ERROR_OUT_OF_DATE_KHR) {  // In case of a window resize
+        recreateSwapChain();
+        return;
+    }
     if (result != VK_SUCCESS && result != VK_SUBOPTIMAL_KHR) {
         throw std::runtime_error("failed to acquire swap chain image!");
     }
 
-    result = vkteSwapChain.submitCommandBuffers(&commandBuffers[imageIndex], &imageIndex);
+    recordCommandBuffer(imageIndex);
+    result = vkteSwapChain->submitCommandBuffers(&commandBuffers[imageIndex], &imageIndex);
+    if (result == VK_ERROR_OUT_OF_DATE_KHR || result == VK_SUBOPTIMAL_KHR || vkteWindow.wasWindowResized())  {  // In case of a window resize
+        vkteWindow.resetWindowResizedFlag();
+        recreateSwapChain();
+        return;
+    }
     if (result != VK_SUCCESS) {
         throw std::runtime_error("failed to present swap chain image!");
     }
 }
-
-// отрисовка треугольника Серпинского
-
-//void Application::sierpinski(
-//        std::vector<VKTEModel::Vertex> &vertices,
-//        int depth,
-//        glm::vec2 left,
-//        glm::vec2 right,
-//        glm::vec2 top) {
-//    if (depth <= 0) {
-//        vertices.push_back({top});
-//        vertices.push_back({right});
-//        vertices.push_back({left});
-//    } else {
-//        auto leftTop = 0.5f * (left + top);
-//        auto rightTop = 0.5f * (right + top);
-//        auto leftRight = 0.5f * (left + right);
-//        sierpinski(vertices, depth - 1, left, leftRight, leftTop);
-//        sierpinski(vertices, depth - 1, leftRight, right, rightTop);
-//        sierpinski(vertices, depth - 1, leftTop, rightTop, top);
-//    }
-//}
-//void Application::loadModels() {
-//    std::vector<VKTEModel::Vertex> vertices{};
-//    sierpinski(vertices, 10, {-0.5f, 0.5f}, {0.5f, 0.5f}, {0.0f, -0.5f});
-//    vkteModel = std::make_unique<VKTEModel>(vkteDevice, vertices);
-//}
 
 }  // namespace vkte

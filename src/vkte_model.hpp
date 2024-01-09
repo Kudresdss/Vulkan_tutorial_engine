@@ -23,6 +23,7 @@ public:
         static std::vector<VkVertexInputBindingDescription> getBindingDescriptions();
     };
 
+//    VKTEModel() = default;
     VKTEModel(VKTEDevice& vkteDevice, const std::vector<Vertex> &vertices);
     ~VKTEModel();
 
