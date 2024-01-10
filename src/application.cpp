@@ -54,21 +54,6 @@ void Application::createPipelineLayout() {
     }
 }
 
-void Application::createPipeline() {
-    assert(vkteSwapChain != nullptr && "Cannot create pipeline before swap chain");
-    assert(pipelineLayout != nullptr && "Cannot create pipeline before pipeline layout");
-
-    PipelineConfigInfo pipelineConfigInfo{};
-    VKTEPipeline::setDefaultPipelineConfigInfo(pipelineConfigInfo);
-    pipelineConfigInfo.renderPass = vkteSwapChain->getRenderPass();
-    pipelineConfigInfo.pipelineLayout = pipelineLayout;
-    vktePipeline = std::make_unique<VKTEPipeline>(
-        vkteDevice,
-        "shaders/simple_shader.vert.spv",
-        "shaders/simple_shader.frag.spv",
-        pipelineConfigInfo);
-}
-
 void Application::recreateSwapChain() {
     auto extent = vkteWindow.getExtent();
     while (extent.width == 0 || extent.height == 0) {  // If any of window's dimensions are zero (during resize) -> wait
@@ -82,13 +67,28 @@ void Application::recreateSwapChain() {
     }
     else {  // There is a previous swap chain
         vkteSwapChain = std::make_unique<VKTESwapChain>(vkteDevice, extent, std::move(vkteSwapChain));
-        if (vkteSwapChain->imageCount() != commandBuffers.size()) {  // New swap chain supports different frame bufferization
+        if (vkteSwapChain->imageCount() != commandBuffers.size()) {  // Old swap chain supports different frame bufferization
             freeCommandBuffers();
             createCommandBuffers();
         }
     }
 
     createPipeline();  // Future optimization: if render pass is compatible -> do noting
+}
+
+void Application::createPipeline() {
+    assert(vkteSwapChain != nullptr && "Cannot create pipeline before swap chain");
+    assert(pipelineLayout != nullptr && "Cannot create pipeline before pipeline layout");
+
+    PipelineConfigInfo pipelineConfigInfo{};
+    VKTEPipeline::setDefaultPipelineConfigInfo(pipelineConfigInfo);
+    pipelineConfigInfo.renderPass = vkteSwapChain->getRenderPass();
+    pipelineConfigInfo.pipelineLayout = pipelineLayout;
+    vktePipeline = std::make_unique<VKTEPipeline>(
+            vkteDevice,
+            "shaders/simple_shader.vert.spv",
+            "shaders/simple_shader.frag.spv",
+            pipelineConfigInfo);
 }
 
 void Application::createCommandBuffers() {
@@ -116,6 +116,30 @@ void Application::freeCommandBuffers() {
         static_cast<uint32_t>(commandBuffers.size()),
         commandBuffers.data());
     commandBuffers.clear();
+}
+
+void Application::drawFrame() {
+    uint32_t imageIndex;
+
+    auto result = vkteSwapChain->acquireNextImage(&imageIndex);
+    if (result == VK_ERROR_OUT_OF_DATE_KHR) {  // In case of a window resize error
+        recreateSwapChain();
+        return;
+    }
+    if (result != VK_SUCCESS && result != VK_SUBOPTIMAL_KHR) {
+        throw std::runtime_error("failed to acquire swap chain image!");
+    }
+
+    recordCommandBuffer(imageIndex);
+    result = vkteSwapChain->submitCommandBuffers(&commandBuffers[imageIndex], &imageIndex);
+    if (result == VK_ERROR_OUT_OF_DATE_KHR || result == VK_SUBOPTIMAL_KHR || vkteWindow.wasWindowResized())  {  // In case of a window resize error
+        vkteWindow.resetWindowResizedFlag();
+        recreateSwapChain();
+        return;
+    }
+    if (result != VK_SUCCESS) {
+        throw std::runtime_error("failed to present swap chain image!");
+    }
 }
 
 void Application::recordCommandBuffer(int imageIndex) {
@@ -160,30 +184,6 @@ void Application::recordCommandBuffer(int imageIndex) {
     vkCmdEndRenderPass(commandBuffers[imageIndex]);
     if (vkEndCommandBuffer(commandBuffers[imageIndex]) != VK_SUCCESS) {
         throw std::runtime_error("failed to record command buffer!");
-    }
-}
-
-void Application::drawFrame() {
-    uint32_t imageIndex;
-
-    auto result = vkteSwapChain->acquireNextImage(&imageIndex);
-    if (result == VK_ERROR_OUT_OF_DATE_KHR) {  // In case of a window resize
-        recreateSwapChain();
-        return;
-    }
-    if (result != VK_SUCCESS && result != VK_SUBOPTIMAL_KHR) {
-        throw std::runtime_error("failed to acquire swap chain image!");
-    }
-
-    recordCommandBuffer(imageIndex);
-    result = vkteSwapChain->submitCommandBuffers(&commandBuffers[imageIndex], &imageIndex);
-    if (result == VK_ERROR_OUT_OF_DATE_KHR || result == VK_SUBOPTIMAL_KHR || vkteWindow.wasWindowResized())  {  // In case of a window resize
-        vkteWindow.resetWindowResizedFlag();
-        recreateSwapChain();
-        return;
-    }
-    if (result != VK_SUCCESS) {
-        throw std::runtime_error("failed to present swap chain image!");
     }
 }
 
