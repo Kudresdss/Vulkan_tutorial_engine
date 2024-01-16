@@ -1,7 +1,7 @@
 #ifndef VULKAN_TUTORIAL_ENGINE_GAME_OBJECT_HPP
 #define VULKAN_TUTORIAL_ENGINE_GAME_OBJECT_HPP
 
-#include "vkte_model.hpp"
+#include "model.hpp"
 
 //std
 #include <memory>

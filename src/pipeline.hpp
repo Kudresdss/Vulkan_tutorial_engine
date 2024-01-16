@@ -1,7 +1,7 @@
 #ifndef VULKAN_TUTORIAL_ENGINE_PIPELINE_HPP
 #define VULKAN_TUTORIAL_ENGINE_PIPELINE_HPP
 
-#include "vkte_device.hpp"
+#include "device.hpp"
 
 //std
 #include <string>

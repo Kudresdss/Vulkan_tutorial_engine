@@ -1,5 +1,5 @@
-#include "vkte_pipeline.hpp"
-#include "vkte_model.hpp"
+#include "pipeline.hpp"
+#include "model.hpp"
 
 //std
 #include <fstream>

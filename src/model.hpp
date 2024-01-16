@@ -1,7 +1,7 @@
 #ifndef VULKAN_TUTORIAL_ENGINE_OBJECT_MODEL_HPP
 #define VULKAN_TUTORIAL_ENGINE_OBJECT_MODEL_HPP
 
-#include "vkte_device.hpp"
+#include "device.hpp"
 
 //libs
 #define GLM_FORCE_RADIANS

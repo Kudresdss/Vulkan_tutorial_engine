@@ -1,7 +1,7 @@
 #ifndef VULKAN_TUTORIAL_ENGINE_SWAP_CHAIN_HPP
 #define VULKAN_TUTORIAL_ENGINE_SWAP_CHAIN_HPP
 
-#include "vkte_device.hpp"
+#include "device.hpp"
 
 //vulkan
 #include <vulkan/vulkan.h>

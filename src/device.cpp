@@ -1,4 +1,4 @@
-#include "vkte_device.hpp"
+#include "device.hpp"
 
 //std
 #include <cstring>

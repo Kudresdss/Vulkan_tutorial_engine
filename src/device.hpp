@@ -1,7 +1,7 @@
 #ifndef VULKAN_TUTORIAL_ENGINE_DEVICE_HPP
 #define VULKAN_TUTORIAL_ENGINE_DEVICE_HPP
 
-#include "vkte_window.hpp"
+#include "window.hpp"
 
 //std
 #include <string>
