@@ -5,18 +5,18 @@
 
 namespace vkte {
 
-VKTEWindow::VKTEWindow(
+RendererWindow::RendererWindow(
     int width, int height, std::string name) : width{width}, height{height}, windowName{name} {
 
     initWindow();
 }
 
-VKTEWindow::~VKTEWindow() {
+RendererWindow::~RendererWindow() {
     glfwDestroyWindow(glfwWindow);
     glfwTerminate();
 }
 
-void VKTEWindow::initWindow() {
+void RendererWindow::initWindow() {
     glfwInit();
     glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
     glfwWindowHint(GLFW_RESIZABLE, GLFW_TRUE);
@@ -26,14 +26,14 @@ void VKTEWindow::initWindow() {
     glfwSetFramebufferSizeCallback(glfwWindow, framebufferResizeCallback);
 }
 
-void VKTEWindow::framebufferResizeCallback(GLFWwindow *glfwWindow, int width, int height) {
-    auto vkteWindow = reinterpret_cast<VKTEWindow *>(glfwGetWindowUserPointer(glfwWindow));
+void RendererWindow::framebufferResizeCallback(GLFWwindow *glfwWindow, int width, int height) {
+    auto vkteWindow = reinterpret_cast<RendererWindow *>(glfwGetWindowUserPointer(glfwWindow));
     vkteWindow->framebufferResized = true;
     vkteWindow->width = width;
     vkteWindow->height = height;
 }
 
-void VKTEWindow::createWindowSurface(VkInstance instance, VkSurfaceKHR *surface) {
+void RendererWindow::createWindowSurface(VkInstance instance, VkSurfaceKHR *surface) {
     if (glfwCreateWindowSurface(instance, glfwWindow, nullptr, surface) != VK_SUCCESS) {
         throw std::runtime_error("failed to create window surface");
     }

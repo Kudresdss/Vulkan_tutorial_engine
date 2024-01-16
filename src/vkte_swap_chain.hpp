@@ -1,5 +1,5 @@
-#ifndef VULKAN_TUTORIAL_ENGINE_VKTE_SWAP_CHAIN_HPP
-#define VULKAN_TUTORIAL_ENGINE_VKTE_SWAP_CHAIN_HPP
+#ifndef VULKAN_TUTORIAL_ENGINE_SWAP_CHAIN_HPP
+#define VULKAN_TUTORIAL_ENGINE_SWAP_CHAIN_HPP
 
 #include "vkte_device.hpp"
 
@@ -13,17 +13,17 @@
 
 namespace  vkte {
 
-class VKTESwapChain {
+class SwapChain {
 public:
     static constexpr int MAX_FRAMES_IN_FLIGHT = 2;
 
-//    VKTESwapChain() = default;
-    VKTESwapChain(VKTEDevice &deviceRef, VkExtent2D windowExtent);
-    VKTESwapChain(VKTEDevice &deviceRef, VkExtent2D windowExtent, std::shared_ptr<VKTESwapChain> previous);
-    ~VKTESwapChain();
+//    SwapChain() = default;
+    SwapChain(Device &deviceRef, VkExtent2D windowExtent);
+    SwapChain(Device &deviceRef, VkExtent2D windowExtent, std::shared_ptr<SwapChain> previous);
+    ~SwapChain();
 
-    VKTESwapChain(const VKTESwapChain &) = delete;
-    VKTESwapChain& operator=(const VKTESwapChain &) = delete;
+    SwapChain(const SwapChain &) = delete;
+    SwapChain& operator=(const SwapChain &) = delete;
 
     VkFramebuffer getFrameBuffer(int index) { return swapChainFramebuffers[index]; }
     VkRenderPass getRenderPass() { return renderPass; }
@@ -70,11 +70,11 @@ private:
     std::vector<VkImage> swapChainImages;
     std::vector<VkImageView> swapChainImageViews;
 
-    VKTEDevice &device;
+    Device &device;
     VkExtent2D windowExtent;
 
     VkSwapchainKHR swapChain;
-    std::shared_ptr<VKTESwapChain> oldSwapChain;
+    std::shared_ptr<SwapChain> oldSwapChain;
 
     std::vector<VkSemaphore> imageAvailableSemaphores;
     std::vector<VkSemaphore> renderFinishedSemaphores;
@@ -85,4 +85,4 @@ private:
 
 }  // namespace vkte
 
-#endif  // VULKAN_TUTORIAL_ENGINE_VKTE_SWAP_CHAIN_HPP
+#endif  // VULKAN_TUTORIAL_ENGINE_SWAP_CHAIN_HPP

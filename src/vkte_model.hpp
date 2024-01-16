@@ -1,5 +1,5 @@
-#ifndef VULKAN_TUTORIAL_ENGINE_VKTE_MODEL_HPP
-#define VULKAN_TUTORIAL_ENGINE_VKTE_MODEL_HPP
+#ifndef VULKAN_TUTORIAL_ENGINE_OBJECT_MODEL_HPP
+#define VULKAN_TUTORIAL_ENGINE_OBJECT_MODEL_HPP
 
 #include "vkte_device.hpp"
 
@@ -13,7 +13,7 @@
 
 namespace vkte {
 
-class VKTEModel {
+class ObjectModel {
 public:
     struct Vertex{
         glm::vec2 position;
@@ -23,12 +23,12 @@ public:
         static std::vector<VkVertexInputBindingDescription> getBindingDescriptions();
     };
 
-//    VKTEModel() = default;
-    VKTEModel(VKTEDevice& vkteDevice, const std::vector<Vertex> &vertices);
-    ~VKTEModel();
+//    ObjectModel() = default;
+    ObjectModel(Device& vkteDevice, const std::vector<Vertex> &vertices);
+    ~ObjectModel();
 
-    VKTEModel(const VKTEModel &) = delete;
-    VKTEModel& operator=(const VKTEModel &) = delete;
+    ObjectModel(const ObjectModel &) = delete;
+    ObjectModel& operator=(const ObjectModel &) = delete;
 
     void bind(VkCommandBuffer commandBuffer);
     void draw(VkCommandBuffer commandBuffer);
@@ -36,7 +36,7 @@ public:
 private:
     void createVertexBuffers(const std::vector<Vertex> &vertices);
 
-    VKTEDevice& vkteDevice;
+    Device& device;
     VkBuffer vertexBuffer;
     VkDeviceMemory vertexBufferMemory;
     uint32_t vertexCount;
@@ -44,4 +44,4 @@ private:
 
 }  // namespace vkte
 
-#endif  // VULKAN_TUTORIAL_ENGINE_VKTE_MODEL_HPP
+#endif  // VULKAN_TUTORIAL_ENGINE_OBJECT_MODEL_HPP

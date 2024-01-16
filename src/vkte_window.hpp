@@ -1,5 +1,5 @@
-#ifndef VULKAN_TUTORIAL_ENGINE_VKTE_WINDOW_HPP
-#define VULKAN_TUTORIAL_ENGINE_VKTE_WINDOW_HPP
+#ifndef VULKAN_TUTORIAL_ENGINE_RENDERER_WINDOW_HPP
+#define VULKAN_TUTORIAL_ENGINE_RENDERER_WINDOW_HPP
 
 #define GLFW_INCLUDE_VULKAN
 #include <GLFW/glfw3.h>
@@ -9,14 +9,14 @@
 
 namespace vkte {
 
-class VKTEWindow {
+class RendererWindow {
 public:
-//    VKTEWindow() = default;
-    VKTEWindow(int width, int height, std::string name);
-    ~VKTEWindow();
+//    RendererWindow() = default;
+    RendererWindow(int width, int height, std::string name);
+    ~RendererWindow();
 
-    VKTEWindow(const VKTEWindow &) = delete;
-    VKTEWindow& operator=(const VKTEWindow &) = delete;
+    RendererWindow(const RendererWindow &) = delete;
+    RendererWindow& operator=(const RendererWindow &) = delete;
 
     bool shouldClose() { return glfwWindowShouldClose(glfwWindow); }
     bool wasWindowResized() { return framebufferResized; }
@@ -39,4 +39,4 @@ private:
 
 }  // namespace vkte
 
-#endif  // VULKAN_TUTORIAL_ENGINE_VKTE_WINDOW_HPP
+#endif  // VULKAN_TUTORIAL_ENGINE_RENDERER_WINDOW_HPP

@@ -1,5 +1,5 @@
-#ifndef VULKAN_TUTORIAL_ENGINE_VKTE_DEVICE_HPP
-#define VULKAN_TUTORIAL_ENGINE_VKTE_DEVICE_HPP
+#ifndef VULKAN_TUTORIAL_ENGINE_DEVICE_HPP
+#define VULKAN_TUTORIAL_ENGINE_DEVICE_HPP
 
 #include "vkte_window.hpp"
 
@@ -23,7 +23,7 @@ struct QueueFamilyIndices {
     bool isComplete() { return graphicsFamilyHasValue && presentFamilyHasValue; }
 };
 
-class VKTEDevice {
+class Device {
 public:
 #ifdef NDEBUG
     const bool enableValidationLayers = false;
@@ -31,16 +31,16 @@ public:
     const bool enableValidationLayers = true;
 #endif
 
-//    VKTEDevice() = default;
-    VKTEDevice(VKTEWindow &window);
-    ~VKTEDevice();
+//    Device() = default;
+    Device(RendererWindow &window);
+    ~Device();
 
 
     // Not copyable or movable
-    VKTEDevice(const VKTEDevice &) = delete;
-    VKTEDevice& operator=(const VKTEDevice &) = delete;
-    VKTEDevice(VKTEDevice &&) = delete;
-    VKTEDevice& operator=(VKTEDevice &&) = delete;
+    Device(const Device &) = delete;
+    Device& operator=(const Device &) = delete;
+    Device(Device &&) = delete;
+    Device& operator=(Device &&) = delete;
 
     VkCommandPool getCommandPool() { return commandPool; }
     VkDevice device() { return device_; }
@@ -96,7 +96,7 @@ private:
     VkInstance instance;
     VkDebugUtilsMessengerEXT debugMessenger;
     VkPhysicalDevice physicalDevice = VK_NULL_HANDLE;
-    VKTEWindow &window;
+    RendererWindow &window;
     VkCommandPool commandPool;
 
     VkDevice device_;
@@ -112,4 +112,4 @@ private:
 
 }  // namespace vkte
 
-#endif  // VULKAN_TUTORIAL_ENGINE_VKTE_DEVICE_HPP
+#endif  // VULKAN_TUTORIAL_ENGINE_DEVICE_HPP

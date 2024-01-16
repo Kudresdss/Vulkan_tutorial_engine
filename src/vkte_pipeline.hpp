@@ -1,5 +1,5 @@
-#ifndef VULKAN_TUTORIAL_ENGINE_VKTE_PIPELINE_HPP
-#define VULKAN_TUTORIAL_ENGINE_VKTE_PIPELINE_HPP
+#ifndef VULKAN_TUTORIAL_ENGINE_PIPELINE_HPP
+#define VULKAN_TUTORIAL_ENGINE_PIPELINE_HPP
 
 #include "vkte_device.hpp"
 
@@ -28,18 +28,18 @@ struct PipelineConfigInfo {
     uint32_t subpass = 0;
 };
 
-class VKTEPipeline {
+class Pipeline {
 public:
-//    VKTEPipeline() = default;
-    VKTEPipeline(
-            VKTEDevice& device,
+//    Pipeline() = default;
+    Pipeline(
+            Device& device,
             const std::string& vertFilepath,
             const std::string& fragFilepath,
             const PipelineConfigInfo& configInfo);
-    ~VKTEPipeline();
+    ~Pipeline();
 
-    VKTEPipeline(const VKTEPipeline &) = delete;
-    VKTEPipeline& operator=(const VKTEPipeline &) = delete;
+    Pipeline(const Pipeline &) = delete;
+    Pipeline& operator=(const Pipeline &) = delete;
 
     void bind(VkCommandBuffer commandBuffer);
 
@@ -54,7 +54,7 @@ private:
 
     void createShaderModule(const std::vector<char>& code, VkShaderModule *shaderModule);
 
-    VKTEDevice& vkteDevice;
+    Device& device;
     VkPipeline graphicsPipeline;
     VkShaderModule vertShaderModule;
     VkShaderModule fragShaderModule;
@@ -62,4 +62,4 @@ private:
 
 }  // namespace vkte
 
-#endif  // VULKAN_TUTORIAL_ENGINE_VKTE_PIPELINE_HPP
+#endif  // VULKAN_TUTORIAL_ENGINE_PIPELINE_HPP

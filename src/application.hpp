@@ -1,11 +1,12 @@
-#ifndef VULKAN_TUTORIAL_ENGINE_VTE_APPLICATION_H
-#define VULKAN_TUTORIAL_ENGINE_VTE_APPLICATION_H
+#ifndef VULKAN_TUTORIAL_ENGINE_APPLICATION_H
+#define VULKAN_TUTORIAL_ENGINE_APPLICATION_H
 
 #include "vkte_pipeline.hpp"
 #include "vkte_window.hpp"
 #include "vkte_device.hpp"
 #include "vkte_swap_chain.hpp"
 #include "vkte_model.hpp"
+#include "vkte_game_object.hpp"
 
 //std
 #include <memory>
@@ -27,26 +28,27 @@ public:
     void run();
 
 private:
-    void loadModels();
+    void loadGameObjects();
     void createPipelineLayout();
     void createPipeline();
     void createCommandBuffers();
     void freeCommandBuffers();
     void drawFrame();
+    void renderGameObjects(VkCommandBuffer commandBuffer);
 
     // Window initial swap chain creation or recreation in case of window resize
     void recreateSwapChain();
     void recordCommandBuffer(int imageIndex);
 
-    VKTEWindow vkteWindow{WIDTH, HEIGHT, "Vulkan tutorial engine"};
-    VKTEDevice vkteDevice{vkteWindow};
-    std::unique_ptr<VKTESwapChain> vkteSwapChain;
-    std::unique_ptr<VKTEPipeline> vktePipeline;
+    RendererWindow rendererWindow{WIDTH, HEIGHT, "Vulkan tutorial engine"};
+    Device device{rendererWindow};
+    std::unique_ptr<SwapChain> swapChain;
+    std::unique_ptr<Pipeline> pipeline;
     VkPipelineLayout pipelineLayout;
     std::vector<VkCommandBuffer> commandBuffers;
-    std::unique_ptr<VKTEModel> vkteModel;
+    std::vector<GameObject> gameObjects;
 };
 
 }  // namespace vkte
 
-#endif  // VULKAN_TUTORIAL_ENGINE_VTE_APPLICATION_H
+#endif  // VULKAN_TUTORIAL_ENGINE_APPLICATION_H

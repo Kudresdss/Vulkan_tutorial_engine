@@ -6,26 +6,26 @@
 
 namespace vkte {
 
-VKTEModel::VKTEModel(VKTEDevice& device, const std::vector<Vertex> &vertices) : vkteDevice{device} {
+ObjectModel::ObjectModel(Device& device, const std::vector<Vertex> &vertices) : device{device} {
     createVertexBuffers(vertices);
 }
 
-VKTEModel::~VKTEModel() {
-    vkDestroyBuffer(vkteDevice.device(), vertexBuffer, nullptr);
-    vkFreeMemory(vkteDevice.device(), vertexBufferMemory, nullptr);
+ObjectModel::~ObjectModel() {
+    vkDestroyBuffer(device.device(), vertexBuffer, nullptr);
+    vkFreeMemory(device.device(), vertexBufferMemory, nullptr);
 }
 
-void VKTEModel::draw(VkCommandBuffer commandBuffer) {
+void ObjectModel::draw(VkCommandBuffer commandBuffer) {
     vkCmdDraw(commandBuffer, vertexCount, 1, 0, 0);
 }
 
-void VKTEModel::bind(VkCommandBuffer commandBuffer) {
+void ObjectModel::bind(VkCommandBuffer commandBuffer) {
     VkBuffer buffers[] = {vertexBuffer};
     VkDeviceSize offsets[] = {0};
     vkCmdBindVertexBuffers(commandBuffer, 0, 1, buffers, offsets);
 }
 
-std::vector<VkVertexInputAttributeDescription> VKTEModel::Vertex::getAttributeDescriptions() {
+std::vector<VkVertexInputAttributeDescription> ObjectModel::Vertex::getAttributeDescriptions() {
     std::vector<VkVertexInputAttributeDescription> attributeDescriptions(2);
     attributeDescriptions[0].binding = 0;
     attributeDescriptions[0].location = 0;
@@ -40,7 +40,7 @@ std::vector<VkVertexInputAttributeDescription> VKTEModel::Vertex::getAttributeDe
     return attributeDescriptions;
 }
 
-std::vector<VkVertexInputBindingDescription> VKTEModel::Vertex::getBindingDescriptions() {
+std::vector<VkVertexInputBindingDescription> ObjectModel::Vertex::getBindingDescriptions() {
     std::vector<VkVertexInputBindingDescription> bindingDescriptions(1);
     bindingDescriptions[0].binding = 0;
     bindingDescriptions[0].stride = sizeof(Vertex);
@@ -49,12 +49,12 @@ std::vector<VkVertexInputBindingDescription> VKTEModel::Vertex::getBindingDescri
     return bindingDescriptions;
 }
 
-void VKTEModel::createVertexBuffers(const std::vector<Vertex> &vertices) {
+void ObjectModel::createVertexBuffers(const std::vector<Vertex> &vertices) {
     vertexCount = static_cast<uint32_t>(vertices.size());
     assert(vertexCount >= 3 && "Vertex count must be at least 3");
 
     VkDeviceSize bufferSize = sizeof(vertices[0]) * vertexCount;
-    vkteDevice.createBuffer(
+    device.createBuffer(
         bufferSize,
         VK_BUFFER_USAGE_VERTEX_BUFFER_BIT,
         VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
@@ -62,9 +62,9 @@ void VKTEModel::createVertexBuffers(const std::vector<Vertex> &vertices) {
         vertexBufferMemory);
 
     void *data;
-    vkMapMemory(vkteDevice.device(), vertexBufferMemory, 0, bufferSize, 0, &data);
+    vkMapMemory(device.device(), vertexBufferMemory, 0, bufferSize, 0, &data);
     memcpy(data, vertices.data(), static_cast<size_t>(bufferSize));
-    vkUnmapMemory(vkteDevice.device(), vertexBufferMemory);
+    vkUnmapMemory(device.device(), vertexBufferMemory);
 }
 
 }  // namespace vkte
