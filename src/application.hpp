@@ -1,9 +1,8 @@
-#ifndef VULKAN_TUTORIAL_ENGINE_APPLICATION_H
-#define VULKAN_TUTORIAL_ENGINE_APPLICATION_H
+#ifndef VULKAN_TUTORIAL_ENGINE_APPLICATION_HPP
+#define VULKAN_TUTORIAL_ENGINE_APPLICATION_HPP
 
 #include "device.hpp"
 #include "game_object.hpp"
-#include "pipeline.hpp"
 #include "renderer.hpp"
 #include "window.hpp"
 
@@ -28,18 +27,13 @@ public:
 
 private:
     void loadGameObjects();
-    void createPipelineLayout();
-    void createPipeline();
-    void renderGameObjects(VkCommandBuffer commandBuffer);
 
     RendererWindow rendererWindow{WIDTH, HEIGHT, "Vulkan tutorial engine"};
     Device device{rendererWindow};
-    Renderer renderer{rendererWindow, device};
-    std::unique_ptr<Pipeline> pipeline;
-    VkPipelineLayout pipelineLayout;
+    Renderer renderer{device, rendererWindow};
     std::vector<GameObject> gameObjects;
 };
 
 }  // namespace vkte
 
-#endif  // VULKAN_TUTORIAL_ENGINE_APPLICATION_H
+#endif  // VULKAN_TUTORIAL_ENGINE_APPLICATION_HPP

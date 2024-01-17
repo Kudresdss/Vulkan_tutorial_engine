@@ -16,7 +16,7 @@ namespace vkte {
 class Renderer {
 public:
 
-    Renderer(RendererWindow& window, Device& device);
+    Renderer(Device& device, RendererWindow& window);
     ~Renderer();
 
     Renderer(const Renderer &) = delete;
@@ -27,9 +27,13 @@ public:
 
     VkCommandBuffer getCurrentCommandBuffer() const {
         assert(isFrameStarted && "Cannot get command buffer when frame is not in progress");
-        return commandBuffers[currentImageIndex];
+        return commandBuffers[currentFrameIndex];
     }
 
+    int getFrameIndex() const {
+        assert(isFrameStarted && "Cannot get frame index when frame is not in progress");
+        return currentFrameIndex;
+    }
 
     VkCommandBuffer beginFrame();
     void            endFrame();
@@ -47,6 +51,7 @@ private:
     std::vector<VkCommandBuffer> commandBuffers;
 
     uint32_t currentImageIndex;
+    int currentFrameIndex;
     bool isFrameStarted = false;
 };
 

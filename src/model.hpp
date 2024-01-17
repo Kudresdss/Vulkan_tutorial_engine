@@ -24,7 +24,7 @@ public:
     };
 
 //    ObjectModel() = default;
-    ObjectModel(Device& vkteDevice, const std::vector<Vertex> &vertices);
+    ObjectModel(Device& device, const std::vector<Vertex> &vertices);
     ~ObjectModel();
 
     ObjectModel(const ObjectModel &) = delete;
