@@ -46,8 +46,9 @@ void Renderer::endFrame() {
     if (vkEndCommandBuffer(commandBuffer) != VK_SUCCESS) {
         throw std::runtime_error("failed to record command buffer!");
     }
+
     auto result = swapChain->submitCommandBuffers(&commandBuffer, &currentImageIndex);
-    if (result == VK_ERROR_OUT_OF_DATE_KHR || result == VK_SUBOPTIMAL_KHR || rendererWindow.wasWindowResized())  {  // In case of a window resize error
+    if (result == VK_ERROR_OUT_OF_DATE_KHR || result == VK_SUBOPTIMAL_KHR || rendererWindow.wasWindowResized()) {  // In case of a window resize error
         rendererWindow.resetWindowResizedFlag();
         recreateSwapChain();
     } else if (result != VK_SUCCESS) {
@@ -103,14 +104,14 @@ void Renderer::recreateSwapChain() {
         extent = rendererWindow.getExtent();
         glfwWaitEvents();
     }
-
     vkDeviceWaitIdle(device.device());
+
     if (swapChain == nullptr) {  // There's no previous swap chain (init or resize)
         swapChain = std::make_unique<SwapChain>(device, extent);
     }
     else {  // There is a previous swap chain
         std::shared_ptr<SwapChain> oldSwapChain = std::move(swapChain);
-        swapChain = std::make_unique<SwapChain>(device, extent, std::move(swapChain));
+        swapChain = std::make_unique<SwapChain>(device, extent, oldSwapChain);
 
         if (!oldSwapChain->compareSwapFormats(*swapChain.get())) {
             throw std::runtime_error("Swap chain image(or depth) format has changed!");
