@@ -1,6 +1,7 @@
 #ifndef VULKAN_TUTORIAL_ENGINE_RENDER_SYSTEM_HPP
 #define VULKAN_TUTORIAL_ENGINE_RENDER_SYSTEM_HPP
 
+#include "camera.hpp"
 #include "device.hpp"
 #include "game_object.hpp"
 #include "pipeline.hpp"
@@ -19,7 +20,10 @@ public:
     RenderSystem(const RenderSystem &) = delete;
     RenderSystem& operator=(const RenderSystem &) = delete;
 
-    void renderGameObjects(VkCommandBuffer commandBuffer, std::vector<GameObject>& gameObjects);
+    void renderGameObjects(
+        VkCommandBuffer commandBuffer,
+        std::vector<GameObject>& gameObjects,
+        const Camera& camera);
 
 private:
     void createPipelineLayout();

@@ -1,4 +1,6 @@
 #include "application.hpp"
+
+#include "camera.hpp"
 #include "render_system.hpp"
 
 //libs
@@ -21,16 +23,21 @@ Application::~Application() {}
 
 void Application::run() {
     RenderSystem renderSystem{device, renderer.getSwapChainRenderPass()};
+    Camera camera{};
 
     std::cout << "maxPushConstanstSize = " << device.properties.limits.maxPushConstantsSize << '\n';
 
     while (!rendererWindow.shouldClose()) {
         glfwPollEvents();
 
+        float aspect = renderer.getAspectRatio();
+        camera.setPerspectiveProjection(glm::radians(50.f), aspect, 0.1f, 10.f);
+//        camera.setOrthographicProjection(-aspect, aspect, -1, 1, -1, 1);
+
         // unnecessary branch? - optimize later
         if (auto commandBuffer = renderer.beginFrame()) {
             renderer.beginSwapChainRenderPass(commandBuffer);
-            renderSystem.renderGameObjects(commandBuffer, gameObjects);
+            renderSystem.renderGameObjects(commandBuffer, gameObjects, camera);
             renderer.endSwapChainRenderPass(commandBuffer);
             renderer.endFrame();
         }
@@ -44,7 +51,7 @@ void Application::loadGameObjects() {
 
     auto cube = GameObject::createGameObject();
     cube.model = model;
-    cube.transform.translation = {.0f, .0f, .5f};
+    cube.transform.translation = {.0f, .0f, 2.5f};
     cube.transform.scale = {.5f, .5f, .5f};
     gameObjects.push_back(std::move(cube));
 }
