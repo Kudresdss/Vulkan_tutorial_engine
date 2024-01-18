@@ -71,13 +71,15 @@ void RenderSystem::renderGameObjects(
 
     pipeline->bind(commandBuffer);
 
+    auto projectionView = camera.getProjection() * camera.getView();
+
     for (auto& obj : gameObjects) {
         obj.transform.rotation.y = glm::mod(obj.transform.rotation.y + .01f, glm::two_pi<float>());
         obj.transform.rotation.x = glm::mod(obj.transform.rotation.x + .005f, glm::two_pi<float>());
 
         SimplePushConstantData push{};
         push.color = obj.color;
-        push.transform = camera.getProjection() * obj.transform.mat4();  // later move camera calc into shader
+        push.transform = projectionView * obj.transform.mat4();  // later move camera calc into shader
         vkCmdPushConstants(
                 commandBuffer,
                 pipelineLayout,

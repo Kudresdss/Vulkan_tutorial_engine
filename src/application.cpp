@@ -23,7 +23,11 @@ Application::~Application() {}
 
 void Application::run() {
     RenderSystem renderSystem{device, renderer.getSwapChainRenderPass()};
+
     Camera camera{};
+    camera.setViewTarget(glm::vec3(-1.f, -2.f, 2.f), glm::vec3(0.f, 0.f, 2.5f));
+//    camera.setViewDirection(glm::vec3(0.f), glm::vec3(0.5f, 0.f, 1.f));
+
 
     std::cout << "maxPushConstanstSize = " << device.properties.limits.maxPushConstantsSize << '\n';
 
