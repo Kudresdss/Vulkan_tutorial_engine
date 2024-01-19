@@ -1,8 +1,10 @@
 #include "camera.hpp"
 
+//libs
+#include <glm/gtc/constants.hpp>
+
 //std
 #include <cassert>
-#include <limits>
 
 namespace vkte {
 
@@ -17,7 +19,7 @@ void Camera::setOrthographicProjection(float left, float right, float top, float
 }
 
 void Camera::setPerspectiveProjection(float fovY, float aspect, float near, float far) {
-    assert(glm::abs(aspect - std::numeric_limits<float>::epsilon()) > 0.0f);
+    assert(glm::abs(aspect - glm::epsilon<float>()) > 0.0f);
 
     const float tanHalfFovY = tan(fovY / 2.f);
     projectionMatrix = glm::mat4{0.0f};
@@ -29,7 +31,7 @@ void Camera::setPerspectiveProjection(float fovY, float aspect, float near, floa
 }
 
 void Camera::setViewDirection(glm::vec3 position, glm::vec3 direction, glm::vec3 up) {
-    assert(glm::dot(direction, direction) > std::numeric_limits<float>::epsilon() &&
+    assert(glm::dot(direction, direction) > glm::epsilon<float>() &&
             "Camera direction must be a non-zero vector");
 
     const glm::vec3 w{glm::normalize(direction)};

@@ -1,19 +1,16 @@
 #include "keyboard_movement_controller.hpp"
 
-//libs
-#include <limits>
-
 namespace vkte {
 
 void KeyboardMovementController::moveInPlaneXZ(GLFWwindow *window, float dt, GameObject& gameObject) {
     glm::vec3 rotate{0.f};
 
     if (glfwGetKey(window, keys.lookRight) == GLFW_PRESS) rotate.y += 1.f;
-    else if (glfwGetKey(window, keys.lookLeft) == GLFW_PRESS) rotate.y -= 1.f;
-    else if (glfwGetKey(window, keys.lookUp) == GLFW_PRESS) rotate.x += 1.f;
-    else if (glfwGetKey(window, keys.lookDown) == GLFW_PRESS) rotate.x -= 1.f;
+    if (glfwGetKey(window, keys.lookLeft) == GLFW_PRESS) rotate.y -= 1.f;
+    if (glfwGetKey(window, keys.lookUp) == GLFW_PRESS) rotate.x += 1.f;
+    if (glfwGetKey(window, keys.lookDown) == GLFW_PRESS) rotate.x -= 1.f;
 
-    if (glm::dot(rotate, rotate) > std::numeric_limits<float>::epsilon()) {
+    if (glm::dot(rotate, rotate) > glm::epsilon<float>()) {
         gameObject.transform.rotation += turnSpeed * dt * glm::normalize(rotate);
     }
 
@@ -28,13 +25,13 @@ void KeyboardMovementController::moveInPlaneXZ(GLFWwindow *window, float dt, Gam
 
     glm::vec3 moveDir{0.f};
     if (glfwGetKey(window, keys.moveForward) == GLFW_PRESS) moveDir += forwardDir;
-    else if (glfwGetKey(window, keys.moveBackward) == GLFW_PRESS) moveDir -= forwardDir;
-    else if (glfwGetKey(window, keys.moveRight) == GLFW_PRESS) moveDir += rightDir;
-    else if (glfwGetKey(window, keys.moveLeft) == GLFW_PRESS) moveDir -= rightDir;
-    else if (glfwGetKey(window, keys.moveUp) == GLFW_PRESS) moveDir += upDir;
-    else if (glfwGetKey(window, keys.moveDown) == GLFW_PRESS) moveDir -= upDir;
+    if (glfwGetKey(window, keys.moveBackward) == GLFW_PRESS) moveDir -= forwardDir;
+    if (glfwGetKey(window, keys.moveRight) == GLFW_PRESS) moveDir += rightDir;
+    if (glfwGetKey(window, keys.moveLeft) == GLFW_PRESS) moveDir -= rightDir;
+    if (glfwGetKey(window, keys.moveUp) == GLFW_PRESS) moveDir += upDir;
+    if (glfwGetKey(window, keys.moveDown) == GLFW_PRESS) moveDir -= upDir;
 
-    if (glm::dot(moveDir, moveDir) > std::numeric_limits<float>::epsilon()) {
+    if (glm::dot(moveDir, moveDir) > glm::epsilon<float>()) {
         gameObject.transform.translation += moveSpeed * dt * glm::normalize(moveDir);
     }
 }

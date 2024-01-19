@@ -23,8 +23,13 @@ public:
         static std::vector<VkVertexInputBindingDescription> getBindingDescriptions();
     };
 
+    struct Data {
+        std::vector<Vertex> vertices{};
+        std::vector<uint32_t> indices{};
+    };
+
 //    ObjectModel() = default;
-    ObjectModel(Device& device, const std::vector<Vertex> &vertices);
+    ObjectModel(Device& device, const ObjectModel::Data& data);
     ~ObjectModel();
 
     ObjectModel(const ObjectModel &) = delete;
@@ -34,12 +39,19 @@ public:
     void draw(VkCommandBuffer commandBuffer);
 
 private:
-    void createVertexBuffers(const std::vector<Vertex> &vertices);
+    void createVertexBuffers(const std::vector<Vertex>& vertices);
+    void createIndexBuffers(const std::vector<uint32_t>& indices);
 
     Device& device;
+
     VkBuffer vertexBuffer;
     VkDeviceMemory vertexBufferMemory;
     uint32_t vertexCount;
+
+    bool hasIndexBuffer = false;
+    VkBuffer indexBuffer;
+    VkDeviceMemory indexBufferMemory;
+    uint32_t indexCount;
 };
 
 }  // namespace vkte
