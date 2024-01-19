@@ -11,6 +11,7 @@ set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
 set(PROJECT_DIRS
         .
+        libs/tiny_object_loader
         )
 
 #set(TEST_DIRS

@@ -1,14 +1,37 @@
 #include "model.hpp"
 
+#include "utils.hpp"
+
+//libs
+#define TINYOBJLOADER_IMPLEMENTATION
+#include <libs/tiny_object_loader/tiny_obj_loader.h>
+#define GLM_ENABLE_EXPERIMENTAL
+#include <glm/gtx/hash.hpp>
+
 //std
 #include <cassert>
 #include <cstring>
+#include <iostream>
+#include <unordered_map>
+
+namespace std {
+template <>
+struct hash<vkte::ObjectModel::Vertex> {
+    size_t operator()(vkte::ObjectModel::Vertex const &vertex) const {
+        size_t seed = 0;
+        vkte::hashCombine(seed, vertex.position, vertex.color, vertex.normal, vertex.uv);
+
+        return seed;
+    }
+};
+
+}
 
 namespace vkte {
 
 ObjectModel::ObjectModel(Device& device, const ObjectModel::Data& data) : device{device} {
     createVertexBuffers(data.vertices);
-    createIndexBuffers(data.indices);
+    createIndexBuffer(data.indices);
 }
 
 ObjectModel::~ObjectModel() {
@@ -19,6 +42,14 @@ ObjectModel::~ObjectModel() {
         vkDestroyBuffer(device.device(), indexBuffer, nullptr);
         vkFreeMemory(device.device(), indexBufferMemory, nullptr);
     }
+}
+
+std::unique_ptr<ObjectModel> ObjectModel::createModelFromFile(Device& device, const std::string& filepath) {
+    Data data{};
+    data.loadModel(filepath);
+    std::cout << "Vertex count: " << data.vertices.size() << '\n';
+
+    return std::make_unique<ObjectModel>(device, data);
 }
 
 void ObjectModel::draw(VkCommandBuffer commandBuffer) {
@@ -63,6 +94,69 @@ std::vector<VkVertexInputBindingDescription> ObjectModel::Vertex::getBindingDesc
     return bindingDescriptions;
 }
 
+void ObjectModel::Data::loadModel(const std::string &filepath) {
+    tinyobj::attrib_t attribute;
+    std::vector<tinyobj::shape_t> shapes;
+    std::vector<tinyobj::material_t> materials;
+    std::string warning, error;
+
+    if (!tinyobj::LoadObj(&attribute, &shapes, &materials, &warning, &error, filepath.c_str())) {
+        throw std::runtime_error(warning + error);
+    }
+
+    vertices.clear();
+    indices.clear();
+
+    std::unordered_map<Vertex, uint32_t> uniqueVertices{};
+    for (const auto& shape : shapes) {
+        for (const auto& index : shape.mesh.indices) {
+            Vertex vertex{};
+
+            if (index.vertex_index >= 0) {
+                vertex.position = {
+                    attribute.vertices[3 * index.vertex_index + 0],
+                    attribute.vertices[3 * index.vertex_index + 1],
+                    attribute.vertices[3 * index.vertex_index + 2]
+                };
+
+                auto colorIndex = 3 * index.vertex_index + 2;
+                if (colorIndex < attribute.colors.size()) {
+                    vertex.color = {
+                        attribute.colors[colorIndex - 2],
+                        attribute.colors[colorIndex - 1],
+                        attribute.colors[colorIndex - 0]
+                    };
+                } else {
+                    vertex.color = {1.f, 1.f, 1.f}; // set default color
+                }
+            }
+
+            if (index.normal_index >= 0) {
+                vertex.normal = {
+                    attribute.normals[3 * index.normal_index + 0],
+                    attribute.normals[3 * index.normal_index + 1],
+                    attribute.normals[3 * index.normal_index + 2]
+                };
+            }
+
+            if (index.texcoord_index >= 0) {
+                vertex.uv = {
+                    attribute.texcoords[2 * index.texcoord_index + 0],
+                    attribute.texcoords[2 * index.texcoord_index + 1]
+                };
+            }
+
+//            vertices.push_back(vertex);  // uncomment for full vertex count, then comment the later segment
+
+            if (uniqueVertices.count(vertex) == 0) {
+                uniqueVertices[vertex] = static_cast<uint32_t>(vertices.size());
+                vertices.push_back(vertex);
+            }
+            indices.push_back(uniqueVertices[vertex]);
+        }
+    }
+}
+
 void ObjectModel::createVertexBuffers(const std::vector<Vertex> &vertices) {
     vertexCount = static_cast<uint32_t>(vertices.size());
     assert(vertexCount >= 3 && "Vertex count must be at least 3");
@@ -96,7 +190,7 @@ void ObjectModel::createVertexBuffers(const std::vector<Vertex> &vertices) {
     vkFreeMemory(device.device(), stagingBufferMemory, nullptr);
 }
 
-void ObjectModel::createIndexBuffers(const std::vector<uint32_t>& indices) {
+void ObjectModel::createIndexBuffer(const std::vector<uint32_t>& indices) {
     indexCount = static_cast<uint32_t>(indices.size());
     hasIndexBuffer = indexCount > 0;
 
