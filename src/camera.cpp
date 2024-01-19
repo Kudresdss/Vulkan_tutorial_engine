@@ -29,7 +29,8 @@ void Camera::setPerspectiveProjection(float fovY, float aspect, float near, floa
 }
 
 void Camera::setViewDirection(glm::vec3 position, glm::vec3 direction, glm::vec3 up) {
-    //cassert that direction is != 0
+    assert(glm::dot(direction, direction) > std::numeric_limits<float>::epsilon() &&
+            "Camera direction must be a non-zero vector");
 
     const glm::vec3 w{glm::normalize(direction)};
     const glm::vec3 u{glm::normalize(glm::cross(w, up))};

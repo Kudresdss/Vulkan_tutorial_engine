@@ -18,6 +18,8 @@ public:
     RendererWindow(const RendererWindow &) = delete;
     RendererWindow& operator=(const RendererWindow &) = delete;
 
+    GLFWwindow* getGLFWwindow() const { return glfwWindow; }
+
     bool shouldClose() { return glfwWindowShouldClose(glfwWindow); }
     bool wasWindowResized() { return framebufferResized; }
     void resetWindowResizedFlag() { framebufferResized = false; }

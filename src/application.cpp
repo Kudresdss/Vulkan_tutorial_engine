@@ -1,6 +1,7 @@
 #include "application.hpp"
 
 #include "camera.hpp"
+#include "keyboard_movement_controller.hpp"
 #include "render_system.hpp"
 
 //libs
@@ -10,8 +11,9 @@
 #include <glm/gtc/constants.hpp>
 
 //std
-#include <stdexcept>
 #include <array>
+#include <chrono>
+#include <stdexcept>
 
 #include <iostream>
 
@@ -28,11 +30,20 @@ void Application::run() {
     camera.setViewTarget(glm::vec3(-1.f, -2.f, 2.f), glm::vec3(0.f, 0.f, 2.5f));
 //    camera.setViewDirection(glm::vec3(0.f), glm::vec3(0.5f, 0.f, 1.f));
 
+    auto viewerObject = GameObject::createGameObject();
+    KeyboardMovementController cameraController{};
 
-    std::cout << "maxPushConstanstSize = " << device.properties.limits.maxPushConstantsSize << '\n';
+    auto currentTime = std::chrono::high_resolution_clock::now();
 
     while (!rendererWindow.shouldClose()) {
         glfwPollEvents();
+
+        auto newTime = std::chrono::high_resolution_clock::now();
+        float frameTime = std::chrono::duration<float, std::chrono::seconds::period>(newTime - currentTime).count();
+        currentTime = newTime;
+
+        cameraController.moveInPlaneXZ(rendererWindow.getGLFWwindow(), frameTime, viewerObject);
+        camera.setViewYXZ(viewerObject.transform.translation, viewerObject.transform.rotation);
 
         float aspect = renderer.getAspectRatio();
         camera.setPerspectiveProjection(glm::radians(50.f), aspect, 0.1f, 10.f);
