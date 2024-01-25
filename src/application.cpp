@@ -1,5 +1,6 @@
 #include "application.hpp"
 
+#include "buffer.hpp"
 #include "camera.hpp"
 #include "keyboard_movement_controller.hpp"
 #include "render_system.hpp"
@@ -19,11 +20,28 @@
 
 namespace vkte {
 
+struct GlobalUbo {
+    glm::mat4 projectionView{1.f};
+    glm::vec3 lightDirection = glm::normalize(glm::vec3{1.f, -3.f, -1.f});
+};
+
 Application::Application() { loadGameObjects(); }
 
 Application::~Application() {}
 
 void Application::run() {
+
+    Buffer globalUboBuffer{
+        device,
+        sizeof(GlobalUbo),
+        SwapChain::MAX_FRAMES_IN_FLIGHT,
+        VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
+        VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT,
+        device.properties.limits.minUniformBufferOffsetAlignment
+    };
+
+    globalUboBuffer.map();
+
     RenderSystem renderSystem{device, renderer.getSwapChainRenderPass()};
 
     Camera camera{};
@@ -47,12 +65,27 @@ void Application::run() {
 
         float aspect = renderer.getAspectRatio();
         camera.setPerspectiveProjection(glm::radians(50.f), aspect, 0.1f, 10.f);
-//        camera.setOrthographicProjection(-aspect, aspect, -1, 1, -1, 1);
+        // camera.setOrthographicProjection(-aspect, aspect, -1, 1, -1, 1);
 
         // unnecessary branch? - optimize later
         if (auto commandBuffer = renderer.beginFrame()) {
+            int frameIndex = renderer.getFrameIndex();
+            FrameInfo frameInfo{
+                frameIndex,
+                frameTime,
+                commandBuffer,
+                camera
+            };
+
+            //update
+            GlobalUbo ubo{};
+            ubo.projectionView = camera.getProjection() * camera.getView();
+            globalUboBuffer.writeToIndex(&ubo, frameIndex);
+            globalUboBuffer.flush(frameIndex);
+
+            //render
             renderer.beginSwapChainRenderPass(commandBuffer);
-            renderSystem.renderGameObjects(commandBuffer, gameObjects, camera);
+            renderSystem.renderGameObjects(frameInfo, gameObjects);
             renderer.endSwapChainRenderPass(commandBuffer);
             renderer.endFrame();
         }

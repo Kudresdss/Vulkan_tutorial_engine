@@ -15,8 +15,8 @@
 namespace vkte {
 
 struct SimplePushConstantData {
-    glm::mat4 transform;
-    glm::mat4 normalMatrix;
+    glm::mat4 transform{1.f};
+    glm::mat4 normalMatrix{1.f};
 };
 
 RenderSystem::RenderSystem(Device& device, VkRenderPass renderPass) : device{device} {
@@ -64,14 +64,11 @@ void RenderSystem::createPipeline(VkRenderPass renderPass) {
             pipelineConfigInfo);
 }
 
-void RenderSystem::renderGameObjects(
-    VkCommandBuffer commandBuffer,
-    std::vector<GameObject>& gameObjects,
-    const Camera& camera) {
+void RenderSystem::renderGameObjects(FrameInfo& frameInfo, std::vector<GameObject>& gameObjects) {
 
-    pipeline->bind(commandBuffer);
+    pipeline->bind(frameInfo.commandBuffer);
 
-    auto projectionView = camera.getProjection() * camera.getView();
+    auto projectionView = frameInfo.camera.getProjection() * frameInfo.camera.getView();
 
     for (auto& obj : gameObjects) {
         SimplePushConstantData push{};
@@ -79,15 +76,15 @@ void RenderSystem::renderGameObjects(
         push.transform = projectionView * modelMatrix;  // later move camera calc into shader
         push.normalMatrix = obj.transform.normalMatrix();
         vkCmdPushConstants(
-                commandBuffer,
+                frameInfo.commandBuffer,
                 pipelineLayout,
                 VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT,
                 0,
                 sizeof(SimplePushConstantData),
                 &push);
 
-        obj.model->bind(commandBuffer);
-        obj.model->draw(commandBuffer);
+        obj.model->bind(frameInfo.commandBuffer);
+        obj.model->draw(frameInfo.commandBuffer);
     }
 }
 

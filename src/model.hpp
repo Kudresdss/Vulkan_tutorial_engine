@@ -1,6 +1,7 @@
 #ifndef VULKAN_TUTORIAL_ENGINE_OBJECT_MODEL_HPP
 #define VULKAN_TUTORIAL_ENGINE_OBJECT_MODEL_HPP
 
+#include "buffer.hpp"
 #include "device.hpp"
 
 //libs
@@ -55,13 +56,11 @@ private:
 
     Device& device;
 
-    VkBuffer vertexBuffer;
-    VkDeviceMemory vertexBufferMemory;
+    std::unique_ptr<Buffer> vertexBuffer;
     uint32_t vertexCount;
 
     bool hasIndexBuffer = false;
-    VkBuffer indexBuffer;
-    VkDeviceMemory indexBufferMemory;
+    std::unique_ptr<Buffer> indexBuffer;
     uint32_t indexCount;
 };
 
