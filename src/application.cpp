@@ -62,13 +62,20 @@ void Application::run() {
 }
 
 void Application::loadGameObjects() {
-    std::shared_ptr<ObjectModel> model = ObjectModel::createModelFromFile(device, "models/flat_vase.obj");
 
-    auto gameObject = GameObject::createGameObject();
-    gameObject.model = model;
-    gameObject.transform.translation = {.0f, .0f, 2.5f};
-    gameObject.transform.scale = {.5f, .5f, .5f};
-    gameObjects.push_back(std::move(gameObject));
+    std::shared_ptr<ObjectModel> model = ObjectModel::createModelFromFile(device, "models/flat_vase.obj");
+    auto flatVase = GameObject::createGameObject();
+    flatVase.model = model;
+    flatVase.transform.translation = {-.5f, .5f, 2.5f};
+    flatVase.transform.scale = {3.f, 1.5f, 3.f};
+    gameObjects.push_back(std::move(flatVase));
+
+    model = ObjectModel::createModelFromFile(device, "models/smooth_vase.obj");
+    auto smoothVase = GameObject::createGameObject();
+    smoothVase.model = model;
+    smoothVase.transform.translation = {.5f, .5f, 2.5f};
+    smoothVase.transform.scale = {3.f, 1.5f, 3.f};
+    gameObjects.push_back(std::move(smoothVase));
 }
 
 }  // namespace vkte

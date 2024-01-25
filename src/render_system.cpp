@@ -15,8 +15,8 @@
 namespace vkte {
 
 struct SimplePushConstantData {
-    glm::mat4 transform{1.f};
-    alignas(16) glm::vec3 color;
+    glm::mat4 transform;
+    glm::mat4 normalMatrix;
 };
 
 RenderSystem::RenderSystem(Device& device, VkRenderPass renderPass) : device{device} {
@@ -75,8 +75,9 @@ void RenderSystem::renderGameObjects(
 
     for (auto& obj : gameObjects) {
         SimplePushConstantData push{};
-        push.color = obj.color;
-        push.transform = projectionView * obj.transform.mat4();  // later move camera calc into shader
+        auto modelMatrix = obj.transform.mat4();
+        push.transform = projectionView * modelMatrix;  // later move camera calc into shader
+        push.normalMatrix = obj.transform.normalMatrix();
         vkCmdPushConstants(
                 commandBuffer,
                 pipelineLayout,
