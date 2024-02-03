@@ -97,6 +97,13 @@ void Application::run() {
 
 void Application::loadGameObjects() {
 
+//    std::shared_ptr<ObjectModel> model = ObjectModel::createModelFromFile(device, "models/colored_cube.obj");
+//    auto coloredCube = GameObject::createGameObject();
+//    coloredCube.model = model;
+//    coloredCube.transform.translation = {0.f, 0.f, 4.f};
+//    coloredCube.transform.scale = {1.f, 1.f, 1.f};
+//    gameObjects.push_back(std::move(coloredCube));
+
     std::shared_ptr<ObjectModel> model = ObjectModel::createModelFromFile(device, "models/flat_vase.obj");
     auto flatVase = GameObject::createGameObject();
     flatVase.model = model;
